@@ -48,11 +48,19 @@
 
   .content{max-width:1400px;margin:0 auto;padding:0 24px;}
 
-  .channel-head{display:flex;gap:24px;align-items:flex-start;padding:20px 0 16px;flex-wrap:wrap;}
-  @media(max-width:600px){
-    .channel-head{flex-direction:column;align-items:flex-start;gap:14px;}
+  /* channel-head: grid so both columns determine the row height together */
+  .channel-head{
+    display:grid;
+    grid-template-columns:138px 1fr;
+    gap:20px 24px;
+    align-items:start;
+    padding:20px 0 16px;
   }
-  .avatar-wrap{position:relative;width:138px;height:138px;border-radius:50%;flex:0 0 auto;cursor:pointer;background:var(--pill);overflow:hidden;border:1px solid var(--line);}
+  @media(max-width:500px){
+    .channel-head{grid-template-columns:96px 1fr;gap:14px 16px;}
+    .avatar-wrap{width:96px !important;height:96px !important;}
+  }
+  .avatar-wrap{position:relative;width:138px;height:138px;border-radius:50%;cursor:pointer;background:var(--pill);overflow:hidden;border:1px solid var(--line);}
   .avatar-wrap img{width:100%;height:100%;object-fit:cover;display:none;}
   .avatar-wrap img.has-img{display:block;}
   .avatar-placeholder{width:100%;height:100%;display:flex;align-items:center;justify-content:center;color:var(--sub);font-size:12px;text-align:center;padding:8px;}
@@ -60,7 +68,7 @@
   .avatar-hint{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#fff;background:rgba(0,0,0,.35);font-size:12px;opacity:0;transition:opacity .15s;text-align:center;}
   .avatar-wrap:hover .avatar-hint{opacity:1;}
 
-  .meta{flex:1;min-width:0;width:100%;padding-top:4px;}
+  .meta{min-width:0;padding-top:4px;}
   .name-row{display:flex;align-items:center;gap:6px;width:100%;}
   .name-input{flex:1;min-width:0;font-size:28px;font-weight:800;border:none;background:transparent;color:var(--text);padding:2px 4px;border-radius:6px;}
   .name-input:hover,.name-input:focus{background:var(--pill);outline:none;}
@@ -91,7 +99,7 @@
   .desc-line .del-btn{opacity:0;border:none;background:none;color:var(--sub);font-size:16px;cursor:pointer;padding:0 2px;line-height:1;flex:0 0 auto;}
   .desc-line:hover .del-btn{opacity:1;}
 
-  .tabs{display:flex;gap:26px;border-bottom:1px solid var(--line);margin-top:18px;overflow-x:auto;}
+  .tabs{display:flex;gap:26px;border-bottom:1px solid var(--line);margin-top:0;overflow-x:auto;}
   .tabs span{padding:14px 2px;font-size:14px;font-weight:500;color:var(--sub);white-space:nowrap;}
   .tabs span:first-child{color:var(--text);border-bottom:2px solid var(--text);}
 
@@ -271,18 +279,25 @@
     try {
       // ── 설정값 ──
       const W = 1920;
-      const BANNER_H = Math.round(W * 423 / 2560);   // 실제 유튜브 배너 비율
+      const BANNER_H = Math.round(W * 423 / 2560);
       const TOPBAR_H = 56;
-      const PAD_X = Math.round(W * 24 / 1400);        // content padding 비례
+      const PAD_X = Math.round(W * 24 / 1400);
       const AVATAR_D = 138;
-      const META_X = PAD_X + AVATAR_D + 24;
-      const META_Y = TOPBAR_H + BANNER_H + 20;
+      const AVATAR_PAD_TOP = 20;   // 배너 아래 여백
 
-      // 설명 줄 목록
-      const descLines = lines.slice();
+      const META_X = PAD_X + AVATAR_D + 24;
+      const META_Y = TOPBAR_H + BANNER_H + AVATAR_PAD_TOP;
+
+      // 아바타 하단 Y
+      const AVATAR_BOTTOM = META_Y + AVATAR_D;
+
+      // 메타 텍스트 높이: 채널명(42) + subline(26) + 설명줄들 + 여백(18)
       const DESC_LINE_H = 22;
-      const META_H = 4 + 42 + 26 + (descLines.length * DESC_LINE_H) + 40; // name+subline+desc+tab-gap
-      const TABS_Y = META_Y + META_H;
+      const META_TEXT_H = 42 + 26 + (lines.length * DESC_LINE_H) + 18;
+      const META_BOTTOM = META_Y + META_TEXT_H;
+
+      // 탭은 아바타와 메타 중 더 아래에서 시작
+      const TABS_Y = Math.max(AVATAR_BOTTOM, META_BOTTOM) + 16;
       const TABS_H = 52;
       const TOTAL_H = TABS_Y + TABS_H + 2;
 
