@@ -58,10 +58,14 @@
   .avatar-hint{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#fff;background:rgba(0,0,0,.35);font-size:12px;opacity:0;transition:opacity .15s;text-align:center;}
   .avatar-wrap:hover .avatar-hint{opacity:1;}
 
-  .meta{flex:1;min-width:260px;padding-top:4px;}
+  .meta{flex:1;min-width:0;width:100%;padding-top:4px;overflow:hidden;}
   .name-row{display:flex;align-items:center;gap:6px;}
-  .name-input{font-size:28px;font-weight:800;border:none;background:transparent;color:var(--text);padding:2px 4px;border-radius:6px;min-width:120px;}
+  .name-input{font-size:28px;font-weight:800;border:none;background:transparent;color:var(--text);padding:2px 4px;border-radius:6px;min-width:0;width:100%;}
   .name-input:hover,.name-input:focus{background:var(--pill);outline:none;}
+  @media(max-width:600px){
+    .name-input{font-size:22px;}
+    .name-row{flex-wrap:wrap;}
+  }
   .verify{width:18px;height:18px;flex:0 0 auto;color:var(--sub);}
 
   .subline{display:flex;align-items:center;gap:6px;color:var(--sub);font-size:14px;margin-top:4px;flex-wrap:wrap;}
@@ -337,23 +341,32 @@
       ctx.beginPath(); ctx.moveTo(0, BANNER_Y+BANNER_H); ctx.lineTo(W, BANNER_Y+BANNER_H); ctx.stroke();
 
       // ── 아바타 ──
-      const AV_X = PAD_X + AVATAR_D/2;
-      const AV_Y = TOPBAR_H + BANNER_H + 20 + AVATAR_D/2;
+      const R = AVATAR_D / 2;           // 반지름
+      const AV_X = PAD_X + R;           // 원 중심 X
+      const AV_Y = TOPBAR_H + BANNER_H + 20 + R; // 원 중심 Y
+
       ctx.save();
       ctx.beginPath();
-      ctx.arc(AV_X, AV_Y, AVATAR_D/2, 0, Math.PI*2);
+      ctx.arc(AV_X, AV_Y, R, 0, Math.PI * 2);
       ctx.clip();
+
       if(avatarDataUrl){
         const aImg = await loadImg(avatarDataUrl);
-        ctx.drawImage(aImg, AV_X - AVATAR_D/2, AV_Y - AVATAR_D/2, AVATAR_D, AVATAR_D);
+        // 이미지를 정사각형으로 중앙 크롭한 뒤 원 안에 맞춤
+        const size = Math.min(aImg.naturalWidth, aImg.naturalHeight);
+        const sx = (aImg.naturalWidth  - size) / 2;
+        const sy = (aImg.naturalHeight - size) / 2;
+        ctx.drawImage(aImg, sx, sy, size, size,   // 소스: 정사각 크롭
+                      AV_X - R, AV_Y - R, AVATAR_D, AVATAR_D); // 목적지: 정사각
       } else {
         ctx.fillStyle = '#f2f2f2';
-        ctx.fillRect(AV_X - AVATAR_D/2, AV_Y - AVATAR_D/2, AVATAR_D, AVATAR_D);
+        ctx.fillRect(AV_X - R, AV_Y - R, AVATAR_D, AVATAR_D);
       }
       ctx.restore();
+
       // 아바타 테두리
       ctx.strokeStyle = '#e5e5e5'; ctx.lineWidth = 1;
-      ctx.beginPath(); ctx.arc(AV_X, AV_Y, AVATAR_D/2, 0, Math.PI*2); ctx.stroke();
+      ctx.beginPath(); ctx.arc(AV_X, AV_Y, R, 0, Math.PI * 2); ctx.stroke();
 
       // ── 채널명 ──
       const channelName = $('channelName').value || '채널 이름';
