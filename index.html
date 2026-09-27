@@ -4,21 +4,22 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>채널 꾸미기 에디터</title>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <style>
   :root{
     --bg:#fff; --text:#0f0f0f; --sub:#606060; --line:#e5e5e5; --pill:#f2f2f2; --accent:#065fd4;
-    box-sizing:border-box; padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+    box-sizing:border-box;
+    padding-top:env(safe-area-inset-top,0px);
+    padding-bottom:env(safe-area-inset-bottom,0px);
   }
-  @media (prefers-color-scheme: dark){
-    :root:not([data-theme="light"]){ --bg:#0f0f0f; --text:#f1f1f1; --sub:#aaa; --line:#303030; --pill:#272727; }
+  @media(prefers-color-scheme:dark){
+    :root:not([data-theme="light"]){--bg:#0f0f0f;--text:#f1f1f1;--sub:#aaa;--line:#303030;--pill:#272727;}
   }
-  :root[data-theme="dark"]{ --bg:#0f0f0f; --text:#f1f1f1; --sub:#aaa; --line:#303030; --pill:#272727; }
+  :root[data-theme="dark"]{--bg:#0f0f0f;--text:#f1f1f1;--sub:#aaa;--line:#303030;--pill:#272727;}
   *{box-sizing:border-box;}
   html{scroll-padding-top:env(safe-area-inset-top,0px);}
-  body{margin:0;background:var(--bg);color:var(--text);font-family:"Roboto","Noto Sans KR",Arial,sans-serif;}
+  body{margin:0;background:var(--bg);color:var(--text);font-family:"Noto Sans KR","Roboto",Arial,sans-serif;}
 
-  /* top bar */
+  /* topbar */
   .topbar{display:flex;align-items:center;gap:16px;padding:10px 16px;border-bottom:1px solid var(--line);}
   .searchbox{flex:1;max-width:600px;display:flex;align-items:center;border:1px solid var(--line);border-radius:20px;overflow:hidden;}
   .searchbox input{flex:1;border:none;background:transparent;color:var(--text);padding:8px 14px;outline:none;font-size:14px;}
@@ -26,30 +27,20 @@
   .pill-btn{border:1px solid var(--line);background:transparent;color:var(--text);border-radius:18px;padding:7px 14px;font-size:13px;white-space:nowrap;}
   .spacer{flex:1;}
 
-  /* banner — empty by default, shows upload prompt */
+  /* banner */
   .banner-wrap{
     position:relative;width:100%;aspect-ratio:2560/423;
-    background:var(--pill);
-    border-bottom:1px solid var(--line);
+    background:var(--pill);border-bottom:1px solid var(--line);
     overflow:hidden;cursor:pointer;
     display:flex;align-items:center;justify-content:center;
   }
   .banner-wrap img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:none;}
   .banner-wrap img.has-img{display:block;}
-  .banner-empty{
-    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;
-    color:var(--sub);font-size:14px;pointer-events:none;text-align:center;
-    transition:opacity .15s;
-  }
+  .banner-empty{display:flex;flex-direction:column;align-items:center;gap:8px;color:var(--sub);font-size:14px;pointer-events:none;text-align:center;}
   .banner-empty .icon{font-size:32px;opacity:.5;}
   .banner-empty small{font-size:12px;opacity:.7;}
-  .banner-overlay{
-    position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:6px;
-    color:#fff;background:rgba(0,0,0,.3);font-size:14px;
-    opacity:0;transition:opacity .15s;pointer-events:none;text-align:center;
-  }
+  .banner-overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:6px;color:#fff;background:rgba(0,0,0,.3);font-size:14px;opacity:0;transition:opacity .15s;pointer-events:none;text-align:center;}
   .banner-overlay small{opacity:.85;font-size:12px;}
-  /* show empty prompt always when no image; show overlay on hover when image present */
   .banner-wrap:not(.has-banner) .banner-empty{opacity:1;}
   .banner-wrap.has-banner .banner-empty{display:none;}
   .banner-wrap.has-banner:hover .banner-overlay{opacity:1;}
@@ -57,7 +48,7 @@
 
   .content{max-width:1400px;margin:0 auto;padding:0 24px;}
 
-  /* channel header */
+  /* channel head */
   .channel-head{display:flex;gap:24px;align-items:flex-start;padding:20px 0 16px;flex-wrap:wrap;}
   .avatar-wrap{position:relative;width:138px;height:138px;border-radius:50%;flex:0 0 auto;cursor:pointer;background:var(--pill);overflow:hidden;border:1px solid var(--line);}
   .avatar-wrap img{width:100%;height:100%;object-fit:cover;display:none;}
@@ -76,50 +67,23 @@
   .subline{display:flex;align-items:center;gap:6px;color:var(--sub);font-size:14px;margin-top:4px;flex-wrap:wrap;}
   .handle-input{border:none;background:transparent;color:var(--sub);font-size:14px;padding:1px 3px;border-radius:4px;width:120px;}
   .handle-input:hover,.handle-input:focus{background:var(--pill);outline:none;}
-  .subs-input{border:none;background:transparent;color:var(--sub);font-size:14px;padding:1px 3px;border-radius:4px;width:70px;}
+  .subs-input{border:none;background:transparent;color:var(--sub);font-size:14px;padding:1px 3px;border-radius:4px;width:80px;}
   .subs-input:hover,.subs-input:focus{background:var(--pill);outline:none;}
   .dot{opacity:.6;}
 
-  /* inline-editable description */
+  /* desc */
   .desc-block{margin-top:10px;max-width:700px;}
-
-  /* each editable line */
-  .desc-line{
-    display:flex;align-items:center;gap:6px;
-    padding:3px 4px;border-radius:6px;
-    min-height:28px;
-    cursor:text;
-  }
+  .desc-line{display:flex;align-items:center;gap:6px;padding:3px 4px;border-radius:6px;min-height:28px;cursor:text;}
   .desc-line:hover{background:var(--pill);}
-  .desc-line .line-text{
-    flex:1;font-size:14px;color:var(--text);line-height:1.5;
-    white-space:pre-wrap;word-break:break-all;
-  }
+  .desc-line .line-text{flex:1;font-size:14px;color:var(--text);line-height:1.5;white-space:pre-wrap;word-break:break-all;}
   .desc-line .line-text .tag{color:var(--accent);font-weight:500;}
-  .desc-line .line-input{
-    flex:1;border:none;background:transparent;color:var(--text);
-    font-size:14px;font-family:inherit;padding:0;outline:none;
-    display:none;
-  }
+  .desc-line .line-input{flex:1;border:none;background:transparent;color:var(--text);font-size:14px;font-family:inherit;padding:0;outline:none;display:none;}
   .desc-line.editing .line-text{display:none;}
   .desc-line.editing .line-input{display:block;}
   .desc-line.editing{background:var(--pill);}
-
-  /* add line button */
-  .desc-add{
-    display:flex;align-items:center;gap:6px;
-    padding:3px 4px;border-radius:6px;
-    color:var(--sub);font-size:13px;cursor:pointer;
-    border:1px dashed transparent;
-    margin-top:2px;
-    user-select:none;
-  }
+  .desc-add{display:flex;align-items:center;gap:6px;padding:3px 4px;border-radius:6px;color:var(--sub);font-size:13px;cursor:pointer;border:1px dashed transparent;margin-top:2px;user-select:none;}
   .desc-add:hover{border-color:var(--line);background:var(--pill);}
-  .desc-line .del-btn{
-    opacity:0;border:none;background:none;color:var(--sub);
-    font-size:16px;cursor:pointer;padding:0 2px;line-height:1;
-    flex:0 0 auto;
-  }
+  .desc-line .del-btn{opacity:0;border:none;background:none;color:var(--sub);font-size:16px;cursor:pointer;padding:0 2px;line-height:1;flex:0 0 auto;}
   .desc-line:hover .del-btn{opacity:1;}
 
   .tabs{display:flex;gap:26px;border-bottom:1px solid var(--line);margin-top:18px;overflow-x:auto;}
@@ -127,45 +91,27 @@
   .tabs span:first-child{color:var(--text);border-bottom:2px solid var(--text);}
 
   .footer-note{padding:22px 4px 40px;color:var(--sub);font-size:12.5px;line-height:1.6;}
-  .footer-note button{margin-top:8px;border:1px solid var(--line);background:transparent;color:var(--text);border-radius:8px;padding:6px 12px;font-size:12.5px;cursor:pointer;}
+  .footer-note button{margin-top:8px;border:1px solid var(--line);background:transparent;color:var(--text);border-radius:8px;padding:6px 12px;font-size:12.5px;cursor:pointer;margin-right:6px;}
   input[type=file]{display:none;}
 
-  /* PNG export button */
-  .export-bar{
-    position:fixed;bottom:24px;right:24px;z-index:999;
-    display:flex;flex-direction:column;align-items:flex-end;gap:8px;
-  }
-  #exportBtn{
-    display:flex;align-items:center;gap:8px;
-    background:#065fd4;color:#fff;border:none;
-    border-radius:20px;padding:10px 20px;font-size:14px;font-weight:600;
-    cursor:pointer;box-shadow:0 2px 12px rgba(0,0,0,.22);
-    transition:background .15s,transform .1s;
-    font-family:inherit;
-  }
+  /* export bar */
+  .export-bar{position:fixed;bottom:24px;right:24px;z-index:999;display:flex;flex-direction:column;align-items:flex-end;gap:8px;}
+  #exportBtn{display:flex;align-items:center;gap:8px;background:#065fd4;color:#fff;border:none;border-radius:20px;padding:10px 20px;font-size:14px;font-weight:600;cursor:pointer;box-shadow:0 2px 12px rgba(0,0,0,.22);transition:background .15s,transform .1s;font-family:inherit;}
   #exportBtn:hover{background:#0556c0;transform:translateY(-1px);}
   #exportBtn:active{transform:translateY(0);}
   #exportBtn:disabled{background:#aaa;cursor:wait;transform:none;}
-  #exportStatus{
-    background:rgba(0,0,0,.72);color:#fff;font-size:12px;
-    padding:5px 12px;border-radius:12px;
-    display:none;white-space:nowrap;
-  }
+  #exportStatus{background:rgba(0,0,0,.72);color:#fff;font-size:12px;padding:5px 12px;border-radius:12px;display:none;white-space:nowrap;}
 </style>
 </head>
 <body>
 
 <div class="topbar">
-  <div class="searchbox">
-    <input value="검색" readonly>
-    <button>🔍</button>
-  </div>
+  <div class="searchbox"><input value="검색" readonly><button>🔍</button></div>
   <div class="spacer"></div>
   <button class="pill-btn">+ 만들기</button>
   <span style="font-size:18px;">🔔</span>
 </div>
 
-<!-- Banner -->
 <label class="banner-wrap" id="bannerWrap" for="bannerInput">
   <img id="bannerImg" alt="">
   <div class="banner-empty">
@@ -173,10 +119,7 @@
     <span>배너 이미지 업로드</span>
     <small>권장 2560 × 1440px · 원본 비율 그대로 표시됩니다</small>
   </div>
-  <div class="banner-overlay">
-    <span>배너 변경</span>
-    <small>2560 × 1440px 권장</small>
-  </div>
+  <div class="banner-overlay"><span>배너 변경</span><small>2560 × 1440px 권장</small></div>
 </label>
 <input type="file" id="bannerInput" accept="image/*">
 
@@ -201,8 +144,6 @@
         <span class="dot">·</span>
         <span>동영상 0개</span>
       </div>
-
-      <!-- inline-editable description -->
       <div class="desc-block" id="descBlock"></div>
       <div class="desc-add" id="descAdd">＋ 설명 추가</div>
     </div>
@@ -218,7 +159,6 @@
   </div>
 </div>
 
-<!-- PNG export floating button -->
 <div class="export-bar">
   <div id="exportStatus"></div>
   <button id="exportBtn">📷 PNG로 저장</button>
@@ -229,101 +169,61 @@
   const $ = id => document.getElementById(id);
   const KEY = 'yt-editor-v2';
 
-  /* ── storage ── */
   function load(){ try{ return JSON.parse(localStorage.getItem(KEY)||'{}'); }catch(e){ return {}; } }
   function save(patch){ try{ localStorage.setItem(KEY, JSON.stringify(Object.assign(load(), patch))); }catch(e){} }
-
-  /* ── helpers ── */
   function esc(s){ return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
-  function renderLine(text){
-    return esc(text).replace(/(#[^\s#<&]+)/g,'<span class="tag">$1</span>');
-  }
+  function renderLine(text){ return esc(text).replace(/(#[^\s#<&]+)/g,'<span class="tag">$1</span>'); }
 
-  /* ── description lines ── */
   let lines = [];
+  let bannerDataUrl = null;
+  let avatarDataUrl = null;
 
   function buildLineEl(text, idx){
     const row = document.createElement('div');
     row.className = 'desc-line';
-    row.dataset.idx = idx;
-
     const span = document.createElement('span');
     span.className = 'line-text';
     span.innerHTML = renderLine(text);
-
     const inp = document.createElement('input');
     inp.className = 'line-input';
     inp.value = text;
     inp.maxLength = 200;
-
     const del = document.createElement('button');
     del.className = 'del-btn';
     del.title = '삭제';
     del.textContent = '×';
-
-    row.appendChild(span);
-    row.appendChild(inp);
-    row.appendChild(del);
-
-    // click to edit
+    row.appendChild(span); row.appendChild(inp); row.appendChild(del);
     row.addEventListener('click', function(e){
-      if(e.target === del) return;
+      if(e.target===del) return;
       if(row.classList.contains('editing')) return;
-      row.classList.add('editing');
-      inp.focus();
-      inp.select();
+      row.classList.add('editing'); inp.focus(); inp.select();
     });
-    inp.addEventListener('input', function(){
-      lines[idx] = inp.value;
-      span.innerHTML = renderLine(inp.value);
-      save({desc: lines});
-    });
-    inp.addEventListener('blur', function(){
-      row.classList.remove('editing');
-    });
-    inp.addEventListener('keydown', function(e){
-      if(e.key === 'Enter'){ inp.blur(); }
-      if(e.key === 'Escape'){ inp.blur(); }
-    });
-    del.addEventListener('click', function(){
-      lines.splice(idx, 1);
-      save({desc: lines});
-      renderDesc();
-    });
+    inp.addEventListener('input', function(){ lines[idx]=inp.value; span.innerHTML=renderLine(inp.value); save({desc:lines}); });
+    inp.addEventListener('blur', function(){ row.classList.remove('editing'); });
+    inp.addEventListener('keydown', function(e){ if(e.key==='Enter'||e.key==='Escape') inp.blur(); });
+    del.addEventListener('click', function(){ lines.splice(idx,1); save({desc:lines}); renderDesc(); });
     return row;
   }
 
   function renderDesc(){
-    const block = $('descBlock');
-    block.innerHTML = '';
-    lines.forEach(function(text, i){
-      block.appendChild(buildLineEl(text, i));
-    });
+    const block = $('descBlock'); block.innerHTML='';
+    lines.forEach(function(t,i){ block.appendChild(buildLineEl(t,i)); });
   }
 
   $('descAdd').addEventListener('click', function(){
-    lines.push('');
-    save({desc: lines});
-    renderDesc();
-    // auto-open last line for editing
+    lines.push(''); save({desc:lines}); renderDesc();
     const rows = $('descBlock').querySelectorAll('.desc-line');
-    const last = rows[rows.length - 1];
-    if(last){
-      last.classList.add('editing');
-      last.querySelector('.line-input').focus();
-    }
+    const last = rows[rows.length-1];
+    if(last){ last.classList.add('editing'); last.querySelector('.line-input').focus(); }
   });
 
-  /* ── image upload ── */
   function imgUpload(inputId, imgId, storeKey, onLoad){
     $(inputId).addEventListener('change', function(){
-      const file = this.files && this.files[0];
-      if(!file) return;
+      const file = this.files && this.files[0]; if(!file) return;
       const r = new FileReader();
       r.onload = function(e){
         const url = e.target.result;
-        $(imgId).src = url;
-        $(imgId).classList.add('has-img');
+        $(imgId).src = url; $(imgId).classList.add('has-img');
         save({[storeKey]: url});
         if(onLoad) onLoad(url);
       };
@@ -331,89 +231,234 @@
     });
   }
 
-  imgUpload('bannerInput','bannerImg','banner', function(){
-    $('bannerWrap').classList.add('has-banner');
+  imgUpload('bannerInput','bannerImg','banner', function(url){
+    bannerDataUrl = url; $('bannerWrap').classList.add('has-banner');
   });
-  imgUpload('avatarInput','avatarImg','avatar', null);
+  imgUpload('avatarInput','avatarImg','avatar', function(url){ avatarDataUrl = url; });
 
-  /* ── text fields ── */
-  $('channelName').addEventListener('input', function(){ save({name: this.value}); });
-  $('handleInput').addEventListener('input', function(){ save({handle: this.value}); });
-  $('subsInput').addEventListener('input', function(){ save({subs: this.value}); });
+  $('channelName').addEventListener('input', function(){ save({name:this.value}); });
+  $('handleInput').addEventListener('input', function(){ save({handle:this.value}); });
+  $('subsInput').addEventListener('input', function(){ save({subs:this.value}); });
 
-  /* ── reset ── */
   $('resetBtn').addEventListener('click', function(){
-    try{ localStorage.removeItem(KEY); }catch(e){}
-    location.reload();
+    try{ localStorage.removeItem(KEY); }catch(e){} location.reload();
   });
 
-  /* ── restore state ── */
   const s = load();
-  if(s.banner){
-    $('bannerImg').src = s.banner;
-    $('bannerImg').classList.add('has-img');
-    $('bannerWrap').classList.add('has-banner');
-  }
-  if(s.avatar){ $('avatarImg').src = s.avatar; $('avatarImg').classList.add('has-img'); }
+  if(s.banner){ bannerDataUrl=s.banner; $('bannerImg').src=s.banner; $('bannerImg').classList.add('has-img'); $('bannerWrap').classList.add('has-banner'); }
+  if(s.avatar){ avatarDataUrl=s.avatar; $('avatarImg').src=s.avatar; $('avatarImg').classList.add('has-img'); }
   if(s.name) $('channelName').value = s.name;
   if(s.handle) $('handleInput').value = s.handle;
   if(s.subs) $('subsInput').value = s.subs;
   if(Array.isArray(s.desc)) lines = s.desc;
-
   renderDesc();
 
-  /* ── PNG export ── */
+  /* ──────────────────────────────────────────
+     PNG export: Canvas API로 직접 그리기
+     출력 해상도: 1920px 기준 고정 레이아웃
+  ────────────────────────────────────────── */
   $('exportBtn').addEventListener('click', async function(){
     const btn = $('exportBtn');
     const status = $('exportStatus');
-
-    btn.disabled = true;
-    btn.textContent = '⏳ 생성 중…';
-    status.style.display = 'block';
-    status.textContent = '채널 화면을 캡처하는 중입니다…';
-
-    // capture target: topbar + banner + content (exclude export bar itself)
-    const target = document.body;
+    btn.disabled = true; btn.textContent = '⏳ 생성 중…';
+    status.style.display = 'block'; status.textContent = '이미지를 그리는 중…';
 
     try {
-      // temporarily hide export bar and footer note during capture
-      const exportBar = document.querySelector('.export-bar');
-      const footerNote = document.querySelector('.footer-note');
-      exportBar.style.visibility = 'hidden';
-      footerNote.style.display = 'none';
+      // ── 설정값 ──
+      const W = 1920;
+      const BANNER_H = Math.round(W * 423 / 2560);   // 실제 유튜브 배너 비율
+      const TOPBAR_H = 56;
+      const PAD_X = Math.round(W * 24 / 1400);        // content padding 비례
+      const AVATAR_D = 138;
+      const META_X = PAD_X + AVATAR_D + 24;
+      const META_Y = TOPBAR_H + BANNER_H + 20;
 
-      // blur any active input so highlight boxes are gone
-      if(document.activeElement) document.activeElement.blur();
+      // 설명 줄 목록
+      const descLines = lines.slice();
+      const DESC_LINE_H = 22;
+      const META_H = 4 + 42 + 26 + (descLines.length * DESC_LINE_H) + 40; // name+subline+desc+tab-gap
+      const TABS_Y = META_Y + META_H;
+      const TABS_H = 52;
+      const TOTAL_H = TABS_Y + TABS_H + 2;
 
-      const canvas = await html2canvas(target, {
-        useCORS: true,
-        allowTaint: true,
-        backgroundColor: getComputedStyle(document.documentElement).getPropertyValue('--bg').trim() || '#ffffff',
-        scale: 2,
-        logging: false,
+      const canvas = document.createElement('canvas');
+      canvas.width = W; canvas.height = TOTAL_H;
+      const ctx = canvas.getContext('2d');
+
+      // 배경
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, W, TOTAL_H);
+
+      // ── 탑바 ──
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, W, TOPBAR_H);
+      ctx.strokeStyle = '#e5e5e5'; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(0, TOPBAR_H); ctx.lineTo(W, TOPBAR_H); ctx.stroke();
+      // 검색박스
+      const SBW = 480, SBH = 36, SBX = W/2 - SBW/2, SBY = (TOPBAR_H - SBH)/2;
+      ctx.strokeStyle = '#e5e5e5'; ctx.lineWidth = 1;
+      roundRect(ctx, SBX, SBY, SBW, SBH, 18);
+      ctx.stroke();
+      ctx.fillStyle = '#606060'; ctx.font = '14px "Noto Sans KR",Arial,sans-serif';
+      ctx.fillText('검색', SBX + 14, SBY + SBH/2 + 5);
+      // 만들기 버튼
+      const MKBW = 80, MKBH = 32;
+      const MKX = W - MKBW - 40, MKY = (TOPBAR_H - MKBH)/2;
+      ctx.strokeStyle = '#e5e5e5'; roundRect(ctx, MKX, MKY, MKBW, MKBH, 16); ctx.stroke();
+      ctx.fillStyle = '#0f0f0f'; ctx.font = '13px "Noto Sans KR",Arial,sans-serif';
+      ctx.fillText('+ 만들기', MKX + 10, MKY + MKBH/2 + 5);
+
+      // ── 배너 ──
+      const BANNER_Y = TOPBAR_H;
+      if(bannerDataUrl){
+        const bImg = await loadImg(bannerDataUrl);
+        // 배너: 유튜브처럼 가로폭 전체, 위아래 중앙 크롭
+        const bAspect = bImg.width / bImg.height;
+        const canvasAspect = W / BANNER_H;
+        let sx=0,sy=0,sw=bImg.width,sh=bImg.height;
+        if(bAspect > canvasAspect){
+          // 원본이 더 넓음 → 좌우 크롭
+          sh = bImg.height;
+          sw = Math.round(bImg.height * canvasAspect);
+          sx = Math.round((bImg.width - sw) / 2);
+        } else {
+          // 원본이 더 높음 → 위아래 크롭
+          sw = bImg.width;
+          sh = Math.round(bImg.width / canvasAspect);
+          sy = Math.round((bImg.height - sh) / 2);
+        }
+        ctx.drawImage(bImg, sx, sy, sw, sh, 0, BANNER_Y, W, BANNER_H);
+      } else {
+        ctx.fillStyle = '#f2f2f2';
+        ctx.fillRect(0, BANNER_Y, W, BANNER_H);
+      }
+      // 배너 하단 선
+      ctx.strokeStyle = '#e5e5e5'; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(0, BANNER_Y+BANNER_H); ctx.lineTo(W, BANNER_Y+BANNER_H); ctx.stroke();
+
+      // ── 아바타 ──
+      const AV_X = PAD_X + AVATAR_D/2;
+      const AV_Y = TOPBAR_H + BANNER_H + 20 + AVATAR_D/2;
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(AV_X, AV_Y, AVATAR_D/2, 0, Math.PI*2);
+      ctx.clip();
+      if(avatarDataUrl){
+        const aImg = await loadImg(avatarDataUrl);
+        ctx.drawImage(aImg, AV_X - AVATAR_D/2, AV_Y - AVATAR_D/2, AVATAR_D, AVATAR_D);
+      } else {
+        ctx.fillStyle = '#f2f2f2';
+        ctx.fillRect(AV_X - AVATAR_D/2, AV_Y - AVATAR_D/2, AVATAR_D, AVATAR_D);
+      }
+      ctx.restore();
+      // 아바타 테두리
+      ctx.strokeStyle = '#e5e5e5'; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.arc(AV_X, AV_Y, AVATAR_D/2, 0, Math.PI*2); ctx.stroke();
+
+      // ── 채널명 ──
+      const channelName = $('channelName').value || '채널 이름';
+      ctx.fillStyle = '#0f0f0f';
+      ctx.font = 'bold 28px "Noto Sans KR",Arial,sans-serif';
+      ctx.fillText(channelName, META_X, META_Y + 32);
+
+      // 인증 뱃지 (체크 아이콘 간단 표현)
+      const nameW = ctx.measureText(channelName).width;
+      const BADGE_X = META_X + nameW + 8;
+      const BADGE_Y = META_Y + 18;
+      ctx.fillStyle = '#606060';
+      ctx.beginPath();
+      ctx.arc(BADGE_X + 9, BADGE_Y + 9, 9, 0, Math.PI*2);
+      ctx.fill();
+      ctx.strokeStyle = '#fff'; ctx.lineWidth = 1.8;
+      ctx.beginPath();
+      ctx.moveTo(BADGE_X+5, BADGE_Y+9); ctx.lineTo(BADGE_X+8, BADGE_Y+13); ctx.lineTo(BADGE_X+14, BADGE_Y+6);
+      ctx.stroke();
+
+      // ── subline ──
+      const handle = $('handleInput').value || 'handle';
+      const subs = $('subsInput').value || '0명';
+      const subText = `@${handle}  ·  구독자 ${subs}  ·  동영상 0개`;
+      ctx.fillStyle = '#606060';
+      ctx.font = '14px "Noto Sans KR",Arial,sans-serif';
+      ctx.fillText(subText, META_X, META_Y + 32 + 26);
+
+      // ── 설명 줄 ──
+      let descY = META_Y + 32 + 26 + 22;
+      lines.forEach(function(text){
+        // 해시태그 파란색, 나머지 검정
+        drawMixedText(ctx, text, META_X, descY, '#0f0f0f', '#065fd4', '14px "Noto Sans KR",Arial,sans-serif');
+        descY += DESC_LINE_H;
       });
 
-      exportBar.style.visibility = '';
-      footerNote.style.display = '';
+      // ── 탭 ──
+      const tabLabels = ['홈','동영상','Shorts','라이브','재생목록','게시물','정보'];
+      ctx.strokeStyle = '#e5e5e5'; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(0, TABS_Y+TABS_H); ctx.lineTo(W, TABS_Y+TABS_H); ctx.stroke();
+      let tabX = PAD_X;
+      tabLabels.forEach(function(label, i){
+        ctx.font = '500 14px "Noto Sans KR",Arial,sans-serif';
+        const tw = ctx.measureText(label).width;
+        ctx.fillStyle = i===0 ? '#0f0f0f' : '#606060';
+        ctx.fillText(label, tabX, TABS_Y + 32);
+        if(i===0){
+          ctx.fillStyle = '#0f0f0f';
+          ctx.fillRect(tabX, TABS_Y + TABS_H - 2, tw, 2);
+        }
+        tabX += tw + 26;
+      });
 
-      // download
+      // ── 다운로드 ──
       const link = document.createElement('a');
-      const name = ($('channelName').value || 'channel').replace(/\s+/g,'_');
-      link.download = name + '_channel.png';
+      const fname = (channelName).replace(/\s+/g,'_') + '_channel.png';
+      link.download = fname;
       link.href = canvas.toDataURL('image/png');
       link.click();
 
       status.textContent = '✅ 저장 완료!';
       setTimeout(function(){ status.style.display='none'; }, 2500);
-    } catch(err) {
+    } catch(err){
       console.error(err);
-      status.textContent = '❌ 캡처 실패 — 콘솔을 확인하세요.';
-      setTimeout(function(){ status.style.display='none'; }, 3000);
+      status.textContent = '❌ 오류: ' + err.message;
+      setTimeout(function(){ status.style.display='none'; }, 4000);
     }
 
-    btn.disabled = false;
-    btn.textContent = '📷 PNG로 저장';
+    btn.disabled = false; btn.textContent = '📷 PNG로 저장';
   });
+
+  /* helpers */
+  function loadImg(src){
+    return new Promise(function(res, rej){
+      const img = new Image();
+      img.onload = function(){ res(img); };
+      img.onerror = rej;
+      img.src = src;
+    });
+  }
+
+  function roundRect(ctx, x, y, w, h, r){
+    ctx.beginPath();
+    ctx.moveTo(x+r, y);
+    ctx.lineTo(x+w-r, y); ctx.arcTo(x+w, y, x+w, y+r, r);
+    ctx.lineTo(x+w, y+h-r); ctx.arcTo(x+w, y+h, x+w-r, y+h, r);
+    ctx.lineTo(x+r, y+h); ctx.arcTo(x, y+h, x, y+h-r, r);
+    ctx.lineTo(x, y+r); ctx.arcTo(x, y, x+r, y, r);
+    ctx.closePath();
+  }
+
+  function drawMixedText(ctx, text, x, y, defaultColor, tagColor, font){
+    ctx.font = font;
+    const parts = text.split(/(#[^\s#]+)/g);
+    let cx = x;
+    parts.forEach(function(part){
+      const isTag = /^#[^\s#]+$/.test(part);
+      ctx.fillStyle = isTag ? tagColor : defaultColor;
+      if(isTag) ctx.font = 'bold ' + font;
+      else ctx.font = font;
+      ctx.fillText(part, cx, y);
+      cx += ctx.measureText(part).width;
+    });
+  }
+
 })();
 </script>
 </body>
